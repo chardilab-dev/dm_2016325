@@ -16,6 +16,11 @@ lapply(paquetes, library, character.only = TRUE)
   
 url <- "https://www.akjournals.com/view/journals/2006/14/1/2006.14.issue-1.xml"
 
+issues_url <- c("https://www.akjournals.com/view/journals/2006/14/1/2006.14.issue-1.xml"
+                ,"https://www.akjournals.com/view/journals/2006/14/2/2006.14.issue-2.xml)"
+                ,"https://www.akjournals.com/view/journals/2006/14/3/2006.14.issue-3.xml"
+                ,"https://www.akjournals.com/view/journals/2006/14/4/2006.14.issue-4.xml")
+
 # Definimos un user-agent similar al de un navegador real
 user_agent_navegador <- paste(
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
@@ -39,49 +44,29 @@ pagina <- respuesta %>%
 #TITULO
 #################
 titulo <- pagina %>%
-  html_element("[data-testid='block-primitivetitle']") %>%
+  html_elements("[data-testid='block-primitivetitle']") %>%
   html_text()
-titulo <- titulo[-length(titulo)]
+titulo <- titulo[length(titulo)]
 
 extraccion_general <- function(nodo) {
   # Extraemos el títulos de los articulos
   titulo <- nodo %>%
-    html_element("[data-testid='block-primitivetitle']") %>%
+    html_elements("[data-testid='block-primitivetitle']") %>%
     html_text2()
-  titulo <- titulo[-length(titulo)]
   
-  # Extraemos el enlace relativo hacia la página del producto
+  issue <- titulo[length(titulo)]
+  titulo <- titulo[-length(titulo)]
+    # Extraemos el enlace relativo hacia la página del producto
   doi <- nodo |> 
     html_elements( " a,[target='_blank'], .c-Button--link") |>
     html_text()
   doi <- doi[grep(pattern="https://doi*",doi)]
   
-  # Extraemos el precio mostrado en el resultado de búsqueda
-  precio <- nodo %>%
-    html_element(".a-price .a-offscreen") %>%
-    html_text2()
-  
-  # Extraemos el texto de la valoración, por ejemplo '4.5 out of 5 stars'
-  rating <- nodo %>%
-    html_element(".a-icon-alt") %>%
-    html_text2()
-  
-  # Extraemos el número de reseñas o valoraciones asociadas al producto
-  n_resenas <- nodo %>%
-    html_element("[aria-label$='ratings'], .s-link-style .s-underline-text") %>%
-    html_text2()
-  
-  # Construimos una fila con los campos extraídos para este producto
   tibble(
     titulo = titulo,
-    # Si el enlace no existe, dejamos un valor faltante; si existe, construimos la URL completa
-    enlace = ifelse(
-      is.na(enlace_relativo),
-      NA_character_,
-      paste0("https://www.amazon.com", enlace_relativo)
-    ),
-    precio = precio,
-    rating = rating,
-    n_resenas = n_resenas
+    doi = doi,
+    issue = issue
   )
 }
+
+df = extraccion_general(pagina)
