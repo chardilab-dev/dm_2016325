@@ -2,6 +2,8 @@
 library(ggplot2)
 library(patchwork)
 library(purrr)
+library(tidyr)
+
 
 ### Clase 7: Limpieza, transformación y normalización de datos.
 
