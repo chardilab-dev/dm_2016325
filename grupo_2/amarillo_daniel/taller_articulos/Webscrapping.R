@@ -1,6 +1,6 @@
 paquetes <- c(
   "rvest", "xml2", "httr2", "dplyr", "stringr","openalexR",
-  "purrr", "tibble", "janitor", "readr", "knitr", "tidyr"
+  "purrr", "tibble", "janitor", "readr", "knitr", "tidyr","RSQLite"
 )
 
 # Verificamos qué paquetes faltan
@@ -13,9 +13,8 @@ if (length(pendientes) > 0) {
 
 # Cargamos los paquetes sin mostrar mensajes
 lapply(paquetes, library, character.only = TRUE)
-  
-url <- "https://www.akjournals.com/view/journals/2006/14/1/2006.14.issue-1.xml"
 
+#URLs DE JOURNALS IMPRESOS
 issues_url <- c("https://www.akjournals.com/view/journals/2006/14/1/2006.14.issue-1.xml"
                 ,"https://www.akjournals.com/view/journals/2006/14/2/2006.14.issue-2.xml"
                 ,"https://www.akjournals.com/view/journals/2006/14/3/2006.14.issue-3.xml"
@@ -74,7 +73,7 @@ for (i in issues_url) {
 }
 
 
-extraer_issue <- function(url){
+extraer_paper <- function(url){
  
   nodo <- crear_nodo(url)
  #EXTRACCIÓN DOI (LLAVE EN COMUN CON GENERALITIES)
@@ -172,35 +171,49 @@ autores <- paste(autores_ex,collapse = ",")
 
  return(list(paper_row,abstract_row,autores_row,ref_row))
 }
+#INICIALIZACIÓN DE TABLAS DE EXTRACCIÓN 
 abstract <- tibble()
 autores <- tibble()
 referencias <- tibble()
 comp_papers <- tibble()
 
- # for (i in papers$doi){
- #   tibbles <- extraer_issue(i)
- #   comp_papers <- comp_papers |> bind_rows(tibbles[1])  
- #   abstract <- abstract |> bind_rows(tibbles[2]) 
- #   autores <- autores |> bind_rows(tibbles[3]) 
- #   referencias <- referencias |> bind_rows(tibbles[4]) 
- #   
- # }
+ pb <- txtProgressBar(min = 1, max = length(papers$doi), style = 3)
+ it  = 0
+ 
+ #PRECAUCIÓN TIEMPO APROXIMADO DE EJECUCIÓN 40 mins a 1 hora 
+  for (i in papers$doi){
+    tibbles <- extraer_paper(i)
+    comp_papers <- comp_papers |> bind_rows(tibbles[1])  
+    abstract <- abstract |> bind_rows(tibbles[2]) 
+    autores <- autores |> bind_rows(tibbles[3]) 
+    referencias <- referencias |> bind_rows(tibbles[4]) 
+    it= it +1 
+    setTxtProgressBar(pb, it)
+  }
 
 
+ 
 
 # Ordenamos y separamos las tablas de referencias y autores
 paper_references <- referencias |> tidyr::unnest(`list(ref_ex)`) |> rename(referencia = `list(ref_ex)`)
+# Creación de Ids de autores
 paper_references$id_referencia <- as.numeric(as.factor(paper_references$referencia))
 references <- paper_references[c("id_referencia","referencia")] |> unique() |> arrange(id_referencia)
 paper_references <- paper_references |> select(-referencia) |> unique()
 
 
 paper_authors <- autores |> tidyr::unnest(autores) 
-paper_authors$id_autor <- as.numeric(as.factor(paper_authors$autores)) |> unique()
-references <- paper_authors[c("id_autor","autores")] |> unique() |> arrange(id_autor)
+# Creación de Ids de referencias
+paper_authors$id_autor <- as.numeric(as.factor(paper_authors$autores)) 
+authors <- paper_authors[c("id_autor","autores")] |> unique() |> arrange(id_autor)
+paper_authors <- paper_authors |> select(-autores) |> unique()
 
+#REMPLAZO DE CITAS EN NA POR 0 (Explicación en el informe)
+comp_papers <- comp_papers |> mutate(nro_de_citas = coalesce(as.numeric(nro_de_citas), 0))
+
+#Creación variables en la tabla principal 
 papers["journal_name"] <- "Journal of Behavioral Addictions" 
-papers <- papers |> full_join(comp_papers,papers,by="doi")
+papers <- papers |> full_join(comp_papers,by="doi")
 papers <- papers |> full_join(paper_authors |>
                                      group_by(doi) |>
                                      summarise(n_autores = n()),by="doi")
@@ -208,3 +221,32 @@ papers <- papers |> full_join(paper_authors |>
 papers <- papers |> full_join(paper_references |>
                                      group_by(doi) |>
                                      summarise(n_referencia = n()),by="doi")
+
+#NORMALIZACIÓN DE CARACTERES
+abstract <- abstract |>
+  mutate(across(-doi, tolower))
+
+#ETIQUETADO DE TEMAS 
+abstract <- abstract |> 
+    mutate(topic_label = case_when(
+    if_any(-doi , ~ str_detect(., "regression|inference|variance|covariance|statistic|sample|survey|random")) ~ "Statistic" ,
+    if_any(-doi , ~ str_detect(., "artificial intelligence| llm |gpt|nlp|agents|neuronal networks|chatbot|deep learning|transformers| ai ")) ~ "AI",
+    if_any(-doi , ~ str_detect(., "machine learning|clustering|knn|overfitting")) ~ "Machine Learning",
+    TRUE ~ "Other"
+  ))
+
+#ANEXION DE LA COLUMNA  ETIQUETA Y CREACIÓN DE LA COLUMNA AÑO
+ papers <- papers |> full_join(abstract[c("doi","topic_label")],by="doi")
+ papers <- papers |> mutate( year = str_sub(fecha_publicacion, -4, -1))
+ 
+ # CREACIÓN LA BASE DE DATOS 
+ con <- dbConnect(RSQLite::SQLite(), "JBA_25_26.sqlite")
+ dbWriteTable(con, "papers", papers)
+ dbWriteTable(con, "paper_authors", paper_authors)
+ dbWriteTable(con, "authors", authors)
+ dbWriteTable(con, "paper_references", paper_references)
+ dbWriteTable(con, "references", references)
+ dbWriteTable(con, "abstract", abstract)
+ dbDisconnect(con)
+ 
+ 
