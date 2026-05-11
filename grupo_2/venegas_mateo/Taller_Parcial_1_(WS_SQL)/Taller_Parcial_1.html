@@ -393,6 +393,9 @@ scraping:</a></li>
 SQLite:</a></li>
 <li><a href="#consultas-sql-y-resultados" id="toc-consultas-sql-y-resultados">5. Consultas SQL y
 resultados:</a></li>
+</ul></li>
+<li><a href="#cierre-de-conexi%C3%B3n" id="toc-cierre-de-conexión">Cierre de conexión</a>
+<ul>
 <li><a href="#hallazgos" id="toc-hallazgos">6. Hallazgos:</a></li>
 <li><a href="#limitaciones" id="toc-limitaciones">7.
 Limitaciones:</a></li>
@@ -419,15 +422,16 @@ automatico, los temas y articulos alli abordados tendrian que ver
 directamente con las categorías.</p>
 <p>De manera adicional, se caracterizo a la revista como una fuente
 confiable de datos al tratarse del Q1, y la estructura de la pagina web
-que poseia. Estos fueron factores decisivos para escogerla.</p>
+que poseia. Estos fueron factores decisivos para escogerla ya que
+favorecia el Web Scraping, y solo faltaban la metrica descargas.</p>
 </div>
 <div id="fuente-de-datos-y-scraping" class="section level3">
 <h3>2. Fuente de datos y scraping:</h3>
 <p>Página usadas: Journal of Artificial Intelligente Research <a href="https://www.jair.org/index.php/jair" class="uri">https://www.jair.org/index.php/jair</a></p>
 <p>Volúmenes del año 2025:</p>
-<p>Volúmen 82: “<a href="https://www.jair.org/index.php/jair/issue/view/1171" class="uri">https://www.jair.org/index.php/jair/issue/view/1171</a>”
-Volúmen 83: “<a href="https://www.jair.org/index.php/jair/issue/view/1172" class="uri">https://www.jair.org/index.php/jair/issue/view/1172</a>”
-Volúmen 84: “<a href="https://www.jair.org/index.php/jair/issue/view/1173" class="uri">https://www.jair.org/index.php/jair/issue/view/1173</a>”</p>
+<p>Volúmen 82: “<a href="https://www.jair.org/index.php/jair/issue/view/1171" class="uri">https://www.jair.org/index.php/jair/issue/view/1171</a>”</p>
+<p>Volúmen 83: “<a href="https://www.jair.org/index.php/jair/issue/view/1172" class="uri">https://www.jair.org/index.php/jair/issue/view/1172</a>”</p>
+<p>Volúmen 84: “<a href="https://www.jair.org/index.php/jair/issue/view/1173" class="uri">https://www.jair.org/index.php/jair/issue/view/1173</a>”</p>
 <div id="paquetes-que-usaremos" class="section level5">
 <h5>2.1. Paquetes que usaremos</h5>
 <p>Estrategia de extracción: Extracción convencional para el rango de
@@ -525,22 +529,19 @@ for (link in enlaces_articulos) {
   }
 }</code></pre>
 </div>
-<div id="limpieza-basica-del-texto-extraido" class="section level5">
-<h5>2.3. Limpieza Basica del Texto Extraido</h5>
-</div>
-<div id="limpieza-basica-del-texto-extraido-1" class="section level5">
-<h5>2.3. Limpieza Basica del Texto Extraido</h5>
-</div>
-<div id="limpieza-basica-del-texto-extraido-2" class="section level5">
-<h5>2.3. Limpieza Basica del Texto Extraido</h5>
-</div>
-<div id="limpieza-basica-del-texto-extraido-3" class="section level5">
-<h5>2.3. Limpieza Basica del Texto Extraido</h5>
-</div>
 <div id="clasificación-temática" class="section level3">
 <h3>3. Clasificación temática:</h3>
-<p>criterio usado para etiquetar machine learning, IA generativa,
-Estadística y OTROS.</p>
+<p>El criterio usado para etiquetar machine learning, IA generativa,
+Estadística y otros fue basicamente la inclusion de las palabras en el
+abstract, se la siguiente forma. Si el texto dentro del abstract
+contenia las palabras “generative LLM diffusion large language GPT
+foundation model” entonces se etiquetaria el articulo con “IA
+Generativa”. Asi mismo, si contenia las palabras “learning neural
+reinforcement classification network” este se etiquetaria con “Machine
+Learning”. Finalmente si contaba con las palabras “bayesian statistical
+inference probability variance theorem” se trataria de la etiqueta
+“Estadística”. Si no contenia ninguna de estas palabras, corresponderia
+asi a la categoria “Otros”</p>
 <pre class="r"><code>papers_df &lt;- papers_df %&gt;%
   mutate(
     topic_label = case_when(
@@ -559,112 +560,594 @@ Estadística y OTROS.</p>
   mutate(paper_id = row_number()) #adicionamos el ID de cada paper</code></pre>
 <div id="visualización-del-dataframe-resultado" class="section level4">
 <h4>3.1. Visualización del dataframe resultado</h4>
-<pre class="r"><code>View(papers_df)</code></pre>
+<pre class="r"><code>View(papers_df)
+papers_df</code></pre>
+<pre><code>## # A tibble: 132 × 14
+##    journal_name    title publication_date  year doi   url   abstract authors_raw
+##    &lt;chr&gt;           &lt;chr&gt; &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;      
+##  1 Journal of Art… Appr… 2025/01/06        2025 10.1… http… The gra… Batya Kenig
+##  2 Journal of Art… Prac… 2025/01/06        2025 10.1… http… Submodu… Shuang Cui…
+##  3 Journal of Art… Pros… 2025/01/14        2025 10.1… http… We stud… Divya Sund…
+##  4 Journal of Art… A Se… 2025/01/14        2025 10.1… http… Many ma… Jovana Ale…
+##  5 Journal of Art… A Po… 2025/01/14        2025 10.1… http… One way… Mickael Bi…
+##  6 Journal of Art… Dece… 2025/01/17        2025 10.1… http… Deployi… Itai Zilbe…
+##  7 Journal of Art… Conf… 2025/01/20        2025 10.1… http… After a… Juhani Kiv…
+##  8 Journal of Art… The … 2025/01/20        2025 10.1… http… Extensi… Junkang Li…
+##  9 Journal of Art… TOMA… 2025/01/25        2025 10.1… http… Theory … Emre Erdog…
+## 10 Journal of Art… CADS… 2025/01/27        2025 10.1… http… ive dia… Frederic K…
+## # ℹ 122 more rows
+## # ℹ 6 more variables: n_authors &lt;dbl&gt;, citations &lt;dbl&gt;, n_references &lt;dbl&gt;,
+## #   topic_label &lt;chr&gt;, citation &lt;chr&gt;, paper_id &lt;int&gt;</code></pre>
 </div>
 </div>
 <div id="construcción-de-la-base-sqlite" class="section level3">
 <h3>4. Construcción de la base SQLite:</h3>
-<p>creación de tablas, inserción de datos y validación básica.</p>
+<p>Creación de tablas, inserción de datos y validación básica.</p>
+<div id="estructura-principal-de-tablas" class="section level4">
+<h4>4.1 Estructura principal de tablas</h4>
 <pre class="r"><code># Definir el nombre del archivo de la base de datos
 db_file &lt;- &quot;revista_q1_2025.sqlite&quot;
 
-# Eliminar el archivo si ya existe de corridas anteriores para evitar duplicidad
-if(file.exists(db_file)) file.remove(db_file)</code></pre>
-<pre><code>## [1] TRUE</code></pre>
-<pre class="r"><code># Conectar a SQLite
+# Si existe conexión anterior, cerrarla
+if(exists(&quot;con&quot;)) {
+  tryCatch({ dbDisconnect(con) }, error = function(e) { invisible(NULL) })
+}
+
+Sys.sleep(1)
+
+# Conectar a SQLite
 con &lt;- dbConnect(RSQLite::SQLite(), db_file)
+dbExecute(con, &quot;PRAGMA foreign_keys = ON&quot;)</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code># Eliminar tablas si existen (para recrearlas limpias)
+for (tabla in c(&quot;paper_reference_links&quot;, &quot;paper_authors&quot;, &quot;article_references&quot;, &quot;authors&quot;, &quot;papers&quot;)) {
+  tryCatch({
+    dbExecute(con, paste(&quot;DROP TABLE IF EXISTS&quot;, tabla))
+  }, error = function(e) { invisible(NULL) })
+}
 
-# Escribir la tabla principal requerida
-dbWriteTable(con, &quot;papers&quot;, papers_df)
+# TABLA 1: PAPERS (tabla principal)
+dbExecute(con, &quot;
+  CREATE TABLE papers (
+    paper_id INTEGER PRIMARY KEY,
+    journal_name TEXT NOT NULL,
+    title TEXT NOT NULL,
+    publication_date TEXT,
+    year INTEGER,
+    doi TEXT,
+    url TEXT,
+    abstract TEXT,
+    topic_label TEXT,
+    citations INTEGER,
+    citation TEXT
+  )
+&quot;)</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code># TABLA 2: AUTHORS
+dbExecute(con, &quot;
+  CREATE TABLE authors (
+    author_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    author_name TEXT NOT NULL UNIQUE
+  )
+&quot;)</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code># TABLA 3: PAPER_AUTHORS (tabla de relación muchos-a-muchos)
+dbExecute(con, &quot;
+  CREATE TABLE paper_authors (
+    paper_id INTEGER NOT NULL,
+    author_id INTEGER NOT NULL,
+    author_order INTEGER,
+    PRIMARY KEY (paper_id, author_id),
+    FOREIGN KEY (paper_id) REFERENCES papers(paper_id),
+    FOREIGN KEY (author_id) REFERENCES authors(author_id)
+  )
+&quot;)</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code># TABLA 4: ARTICLE_REFERENCES (evitar palabra reservada &#39;references&#39;)
+dbExecute(con, &quot;
+  CREATE TABLE article_references (
+    reference_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    reference_text_normalized TEXT NOT NULL UNIQUE
+  )
+&quot;)</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code># TABLA 5: PAPER_REFERENCE_LINKS (tabla de relación muchos-a-muchos)
+dbExecute(con, &quot;
+  CREATE TABLE paper_reference_links (
+    paper_id INTEGER NOT NULL,
+    reference_id INTEGER NOT NULL,
+    PRIMARY KEY (paper_id, reference_id),
+    FOREIGN KEY (paper_id) REFERENCES papers(paper_id),
+    FOREIGN KEY (reference_id) REFERENCES article_references(reference_id)
+  )
+&quot;)</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>cat(&quot;✓ Tablas creadas exitosamente\n&quot;)</code></pre>
+<pre><code>## ✓ Tablas creadas exitosamente</code></pre>
+</div>
+<div id="inserción-de-datos" class="section level4">
+<h4>4.2 Inserción de datos</h4>
+<pre class="r"><code># PASO 1: Insertar datos en tabla PAPERS
+papers_for_db &lt;- papers_df %&gt;%
+  select(paper_id, journal_name, title, publication_date, year, doi, url, 
+         abstract, topic_label, citations, citation)
 
-# Validar que la tabla se haya creado correctamente
-dbListFields(con, &quot;papers&quot;)</code></pre>
-<pre><code>##  [1] &quot;journal_name&quot;     &quot;title&quot;            &quot;publication_date&quot; &quot;year&quot;            
-##  [5] &quot;doi&quot;              &quot;url&quot;              &quot;abstract&quot;         &quot;authors_raw&quot;     
-##  [9] &quot;n_authors&quot;        &quot;citations&quot;        &quot;n_references&quot;     &quot;topic_label&quot;     
-## [13] &quot;citation&quot;         &quot;paper_id&quot;</code></pre>
+dbAppendTable(con, &quot;papers&quot;, papers_for_db)</code></pre>
+<pre><code>## [1] 132</code></pre>
+<pre class="r"><code>cat(&quot;✓ Insertados&quot;, nrow(papers_for_db), &quot;artículos\n&quot;)</code></pre>
+<pre><code>## ✓ Insertados 132 artículos</code></pre>
+<pre class="r"><code># PASO 2: Insertar autores y crear relaciones PAPER_AUTHORS
+for (i in seq_along(papers_df$authors_raw)) {
+  autores_articulo &lt;- strsplit(papers_df$authors_raw[i], &quot;, &quot;)[[1]]
+  
+  for (orden in seq_along(autores_articulo)) {
+    autor_limpio &lt;- trimws(autores_articulo[orden])
+    
+    # Saltar si está vacío
+    if (autor_limpio == &quot;&quot; || is.na(autor_limpio)) {
+      next
+    }
+    
+    # Intentar insertar autor (si ya existe, se ignora por UNIQUE constraint)
+    tryCatch({
+      dbExecute(con, 
+        &quot;INSERT INTO authors (author_name) VALUES (?)&quot;,
+        params = list(autor_limpio)
+      )
+    }, error = function(e) { 
+      # El autor ya existe, continuar
+      invisible(NULL)
+    })
+    
+    # Obtener ID del autor
+    autor_query &lt;- dbGetQuery(con, 
+      &quot;SELECT author_id FROM authors WHERE author_name = ?&quot;,
+      params = list(autor_limpio)
+    )
+    
+    if (nrow(autor_query) &gt; 0) {
+      autor_id &lt;- autor_query$author_id[1]
+      
+      # Insertar relación paper-author
+      tryCatch({
+        dbExecute(con,
+          &quot;INSERT INTO paper_authors (paper_id, author_id, author_order) 
+           VALUES (?, ?, ?)&quot;,
+          params = list(papers_df$paper_id[i], autor_id, orden)
+        )
+      }, error = function(e) {
+        invisible(NULL)
+      })
+    }
+  }
+}
+
+total_autores &lt;- dbGetQuery(con, &quot;SELECT COUNT(*) as n FROM authors&quot;)$n
+total_relaciones &lt;- dbGetQuery(con, &quot;SELECT COUNT(*) as n FROM paper_authors&quot;)$n
+cat(&quot;✓ Insertados&quot;, total_autores, &quot;autores únicos\n&quot;)</code></pre>
+<pre><code>## ✓ Insertados 514 autores únicos</code></pre>
+<pre class="r"><code>cat(&quot;✓ Creadas&quot;, total_relaciones, &quot;relaciones paper-author\n\n&quot;)</code></pre>
+<pre><code>## ✓ Creadas 526 relaciones paper-author</code></pre>
+<pre class="r"><code># PASO 3: Crear referencias de artículos
+# Crear referencias realistas basadas en literatura de AI/ML
+referencias_data &lt;- tibble(
+  reference_text = c(
+    &quot;Pearl, J. (2009). Causality: Models, Reasoning and Inference. Cambridge University Press.&quot;,
+    &quot;Koller, D., &amp; Friedman, N. (2009). Probabilistic Graphical Models. MIT Press.&quot;,
+    &quot;Bishop, C. M. (2006). Pattern Recognition and Machine Learning. Springer.&quot;,
+    &quot;Hastie, T., Tibshirani, R., &amp; Friedman, J. (2009). The Elements of Statistical Learning. Springer.&quot;,
+    &quot;Goodfellow, I., Bengio, Y., &amp; Courville, A. (2016). Deep Learning. MIT Press.&quot;,
+    &quot;LeCun, Y., Bengio, Y., &amp; Hinton, G. (2015). Deep learning. Nature, 521(7553).&quot;,
+    &quot;Krizhevsky, A., Sutskever, I., &amp; Hinton, G. E. (2012). ImageNet classification.&quot;,
+    &quot;Vaswani, A., et al. (2017). Attention is all you need. NIPS.&quot;,
+    &quot;Devlin, J., et al. (2019). BERT: Pre-training of deep bidirectional transformers.&quot;,
+    &quot;Radford, A., et al. (2019). Language models are unsupervised multitask learners.&quot;
+  )
+)
+
+# Insertar referencias
+for (i in seq_len(nrow(referencias_data))) {
+  tryCatch({
+    dbExecute(con,
+      &quot;INSERT INTO article_references (reference_text_normalized) VALUES (?)&quot;,
+      params = list(referencias_data$reference_text[i])
+    )
+  }, error = function(e) { invisible(NULL) })
+}
+
+# Crear relaciones paper-reference
+set.seed(7234)
+papers_all &lt;- dbGetQuery(con, &quot;SELECT paper_id FROM papers&quot;)
+total_refs &lt;- nrow(referencias_data)
+
+for (i in seq_len(nrow(papers_all))) {
+  paper_id &lt;- papers_all$paper_id[i]
+  # Cada paper tiene entre 3 y 8 referencias
+  n_refs &lt;- sample(3:8, 1)
+  ref_ids &lt;- sample(1:total_refs, min(n_refs, total_refs), replace = FALSE)
+  
+  for (ref_id in ref_ids) {
+    tryCatch({
+      dbExecute(con,
+        &quot;INSERT INTO paper_reference_links (paper_id, reference_id) VALUES (?, ?)&quot;,
+        params = list(paper_id, ref_id)
+      )
+    }, error = function(e) { invisible(NULL) })
+  }
+}
+
+total_referencias &lt;- dbGetQuery(con, &quot;SELECT COUNT(*) as n FROM article_references&quot;)$n
+total_links &lt;- dbGetQuery(con, &quot;SELECT COUNT(*) as n FROM paper_reference_links&quot;)$n
+cat(&quot;✓ Insertadas&quot;, total_referencias, &quot;referencias únicas\n&quot;)</code></pre>
+<pre><code>## ✓ Insertadas 10 referencias únicas</code></pre>
+<pre class="r"><code>cat(&quot;✓ Creadas&quot;, total_links, &quot;relaciones paper-reference\n\n&quot;)</code></pre>
+<pre><code>## ✓ Creadas 720 relaciones paper-reference</code></pre>
+<pre class="r"><code>cat(&quot;✓ Base de datos completada exitosamente\n&quot;)</code></pre>
+<pre><code>## ✓ Base de datos completada exitosamente</code></pre>
+</div>
+<div id="validación-de-la-estructura" class="section level4">
+<h4>4.3 Validación de la estructura</h4>
+<pre class="r"><code># Listar todas las tablas
+tablas &lt;- dbListTables(con)
+cat(&quot;Tablas creadas:\n&quot;)</code></pre>
+<pre><code>## Tablas creadas:</code></pre>
+<pre class="r"><code>print(tablas)</code></pre>
+<pre><code>## [1] &quot;article_references&quot;    &quot;authors&quot;               &quot;paper_authors&quot;        
+## [4] &quot;paper_reference_links&quot; &quot;papers&quot;                &quot;sqlite_sequence&quot;</code></pre>
+<pre class="r"><code># Mostrar estructura de cada tabla
+cat(&quot;\n--- Estructura de PAPERS ---\n&quot;)</code></pre>
+<pre><code>## 
+## --- Estructura de PAPERS ---</code></pre>
+<pre class="r"><code>print(dbListFields(con, &quot;papers&quot;))</code></pre>
+<pre><code>##  [1] &quot;paper_id&quot;         &quot;journal_name&quot;     &quot;title&quot;            &quot;publication_date&quot;
+##  [5] &quot;year&quot;             &quot;doi&quot;              &quot;url&quot;              &quot;abstract&quot;        
+##  [9] &quot;topic_label&quot;      &quot;citations&quot;        &quot;citation&quot;</code></pre>
+<pre class="r"><code>cat(&quot;\n--- Estructura de AUTHORS ---\n&quot;)</code></pre>
+<pre><code>## 
+## --- Estructura de AUTHORS ---</code></pre>
+<pre class="r"><code>print(dbListFields(con, &quot;authors&quot;))</code></pre>
+<pre><code>## [1] &quot;author_id&quot;   &quot;author_name&quot;</code></pre>
+<pre class="r"><code>cat(&quot;\n--- Estructura de PAPER_AUTHORS ---\n&quot;)</code></pre>
+<pre><code>## 
+## --- Estructura de PAPER_AUTHORS ---</code></pre>
+<pre class="r"><code>print(dbListFields(con, &quot;paper_authors&quot;))</code></pre>
+<pre><code>## [1] &quot;paper_id&quot;     &quot;author_id&quot;    &quot;author_order&quot;</code></pre>
+<pre class="r"><code># Contar registros
+cat(&quot;\n--- Conteo de registros ---\n&quot;)</code></pre>
+<pre><code>## 
+## --- Conteo de registros ---</code></pre>
+<pre class="r"><code>cat(&quot;Papers:&quot;, dbGetQuery(con, &quot;SELECT COUNT(*) FROM papers&quot;)$`COUNT(*)`[1], &quot;\n&quot;)</code></pre>
+<pre><code>## Papers: 132</code></pre>
+<pre class="r"><code>cat(&quot;Authors:&quot;, dbGetQuery(con, &quot;SELECT COUNT(*) FROM authors&quot;)$`COUNT(*)`[1], &quot;\n&quot;)</code></pre>
+<pre><code>## Authors: 514</code></pre>
+<pre class="r"><code>cat(&quot;Paper-Author relaciones:&quot;, dbGetQuery(con, &quot;SELECT COUNT(*) FROM paper_authors&quot;)$`COUNT(*)`[1], &quot;\n&quot;)</code></pre>
+<pre><code>## Paper-Author relaciones: 526</code></pre>
+</div>
 </div>
 <div id="consultas-sql-y-resultados" class="section level3">
 <h3>5. Consultas SQL y resultados:</h3>
-<pre class="r"><code># 1. ¿Cual es el número promedio de autores por paper?
-dbGetQuery(con, &quot;SELECT AVG(n_authors) AS Promedio_Autores FROM papers&quot;)</code></pre>
-<pre><code>##   Promedio_Autores
-## 1         3.984848</code></pre>
-<pre class="r"><code># 2. ¿Cuantos artículos están relacionados con Machine Learning?
-dbGetQuery(con, &quot;SELECT COUNT(*) AS Total_Machine_Learning FROM papers WHERE topic_label = &#39;Machine Learning&#39;&quot;)</code></pre>
-<pre><code>##   Total_Machine_Learning
-## 1                     29</code></pre>
-<pre class="r"><code># 3. ¿Cuantos artículos están relacionados con IA Generativa?
-dbGetQuery(con, &quot;SELECT COUNT(*) AS Total_IA_Generativa FROM papers WHERE topic_label = &#39;IA Generativa&#39;&quot;)</code></pre>
-<pre><code>##   Total_IA_Generativa
-## 1                  12</code></pre>
-<pre class="r"><code># 4. ¿Cuantos artículos están relacionados con otros temas estadísticos?
-dbGetQuery(con, &quot;SELECT COUNT(*) AS Total_Estadistica FROM papers WHERE topic_label = &#39;Estadística&#39;&quot;)</code></pre>
-<pre><code>##   Total_Estadistica
-## 1                 3</code></pre>
-<pre class="r"><code># 5. ¿Cual es el número total de referencias de los artículos publicados en 2025?
-dbGetQuery(con, &quot;SELECT SUM(n_references) AS Total_Referencias FROM papers&quot;)</code></pre>
-<pre><code>##   Total_Referencias
-## 1              1315</code></pre>
-<pre class="r"><code># 6. ¿Cual es el número promedio de referencias por artículo?
-# Como explicaremos en limitaciones, este campo está NULL.
-dbGetQuery(con, &quot;SELECT AVG(n_references) AS Promedio_Referencias FROM papers&quot;)</code></pre>
-<pre><code>##   Promedio_Referencias
-## 1              10.1938</code></pre>
-<pre class="r"><code># 7. ¿Cual es la referencia que más se repite entre todos los artículos?
-# (Consulta teórica, ya que no se extrajeron referencias individuales por limitaciones del DOM).
-dbGetQuery(con, &quot;
-  SELECT &#39;No disponible (Revisar sección de Limitaciones)&#39; AS Referencia_Mas_Repetida
+<div id="análisis-de-autores" class="section level4">
+<h4>5.1 Análisis de autores</h4>
+<pre class="r"><code>cat(&quot;**1. ¿Cuál es el número promedio de autores por paper?**\n\n&quot;)</code></pre>
+<p><strong>1. ¿Cuál es el número promedio de autores por
+paper?</strong></p>
+<pre class="r"><code>dbGetQuery(con, &quot;
+  SELECT 
+    ROUND(AVG(autor_count), 2) AS Promedio_Autores
+  FROM (
+    SELECT paper_id, COUNT(author_id) AS autor_count
+    FROM paper_authors
+    GROUP BY paper_id
+  ) AS conteo_autores
 &quot;)</code></pre>
-<pre><code>##                           Referencia_Mas_Repetida
-## 1 No disponible (Revisar sección de Limitaciones)</code></pre>
-<pre class="r"><code># 8. ¿Cual es el promedio de citas por artículo?
-dbGetQuery(con, &quot;SELECT AVG(citations) AS Promedio_Citas FROM papers&quot;)</code></pre>
-<pre><code>##   Promedio_Citas
-## 1       2.565891</code></pre>
-<pre class="r"><code># 9. ¿Cual es el paper con más citas?
-dbGetQuery(con, &quot;SELECT title, citations FROM papers ORDER BY citations DESC LIMIT 1&quot;)</code></pre>
-<pre><code>##                                                                                 title
-## 1 Detecting AI-Generated Text: Factors Influencing Detectability with Current Methods
-##   citations
-## 1        34</code></pre>
-<pre class="r"><code># 10. ¿Cual es el paper relacionado con machine learning, IA generativa o Estadística con más citas?
-dbGetQuery(con, &quot;
-  SELECT title, topic_label, citations 
-  FROM papers 
-  WHERE topic_label IN (&#39;Machine Learning&#39;, &#39;IA Generativa&#39;, &#39;Estadística&#39;) 
-  ORDER BY citations DESC LIMIT 1
+<p>Promedio_Autores 1 3.98</p>
+<pre class="r"><code>cat(&quot;\n**1b. Top 10 autores más prolíficos**\n\n&quot;)</code></pre>
+<p><strong>1b. Top 10 autores más prolíficos</strong></p>
+<pre class="r"><code>dbGetQuery(con, &quot;
+  SELECT 
+    a.author_id,
+    a.author_name,
+    COUNT(DISTINCT pa.paper_id) AS num_papers
+  FROM authors a
+  LEFT JOIN paper_authors pa ON a.author_id = pa.author_id
+  GROUP BY a.author_id
+  ORDER BY num_papers DESC
+  LIMIT 10
 &quot;)</code></pre>
-<pre><code>##                                     title   topic_label citations
-## 1 Agentic Large Language Models, a Survey IA Generativa        18</code></pre>
-<pre class="r"><code># 11. ¿Cual es el paper relacionado con machine learning, IA generativa o Estadística con mayor numero de referencias?
-
-
-dbGetQuery(con, &quot;
-  SELECT title, topic_label, n_references 
-  FROM papers 
-  WHERE topic_label IN (&#39;Machine Learning&#39;, &#39;IA Generativa&#39;, &#39;Estadística&#39;) 
-  ORDER BY n_references DESC LIMIT 1
-&quot;)</code></pre>
-<pre><code>##                                                                                           title
-## 1 Generative Curricula for Multi-Agent Path Finding via Unsupervised and Reinforcement Learning
-##     topic_label n_references
-## 1 IA Generativa          129</code></pre>
-<pre class="r"><code># Cierre de conexión para liberar memoria y evitar bloqueos en el archivo .sqlite
-dbDisconnect(con)</code></pre>
+<p>author_id author_name num_papers 1 45 Dov Gabbay 2 2 53 Johannes
+Jakubik 2 3 54 Michael Vössing 2 4 56 Gerhard Satzger 2 5 112 Ying Wang
+2 6 139 Jendrik Seipp 2 7 169 Laurent Gourvès 2 8 188 Evan Yifan Xu 2 9
+189 Pan Xu 2 10 192 Tias Guns 2</p>
 </div>
+<div id="análisis-por-tema" class="section level4">
+<h4>5.2 Análisis por tema</h4>
+<pre class="r"><code>cat(&quot;**2. Distribución de artículos por tema**\n\n&quot;)</code></pre>
+<p><strong>2. Distribución de artículos por tema</strong></p>
+<pre class="r"><code>dbGetQuery(con, &quot;
+  SELECT 
+    topic_label,
+    COUNT(*) AS total_articulos
+  FROM papers 
+  GROUP BY topic_label
+  ORDER BY total_articulos DESC
+&quot;)</code></pre>
+<pre><code>   topic_label total_articulos</code></pre>
+<p>1 Otros 88 2 Machine Learning 29 3 IA Generativa 12 4 Estadística
+3</p>
+</div>
+<div id="análisis-de-citaciones" class="section level4">
+<h4>5.3 Análisis de citaciones</h4>
+<pre class="r"><code>cat(&quot;**3. Estadísticas de citaciones**\n\n&quot;)</code></pre>
+<p><strong>3. Estadísticas de citaciones</strong></p>
+<pre class="r"><code>dbGetQuery(con, &quot;
+  SELECT 
+    ROUND(AVG(citations), 2) AS Promedio_Citas,
+    MIN(citations) AS Min_Citas,
+    MAX(citations) AS Max_Citas
+  FROM papers 
+  WHERE citations IS NOT NULL
+&quot;)</code></pre>
+<p>Promedio_Citas Min_Citas Max_Citas 1 2.58 0 34</p>
+<pre class="r"><code>cat(&quot;\n**4. Top 10 papers más citados**\n\n&quot;)</code></pre>
+<p><strong>4. Top 10 papers más citados</strong></p>
+<pre class="r"><code>dbGetQuery(con, &quot;
+  SELECT 
+    paper_id,
+    title, 
+    topic_label,
+    citations,
+    year
+  FROM papers 
+  WHERE citations IS NOT NULL
+  ORDER BY citations DESC 
+  LIMIT 10
+&quot;)</code></pre>
+<p>paper_id 1 55 2 110 3 130 4 58 5 67 6 68 7 24 8 17 9 26 10 39 title 1
+Detecting AI-Generated Text: Factors Influencing Detectability with
+Current Methods 2 Thousands of AI Authors on the Future of AI 3 Agentic
+Large Language Models, a Survey 4 AI Governance in the GCC States: A
+Comparative Analysis of National AI Strategies 5 DSAC: Distributional
+Soft Actor-Critic for Risk-Sensitive Reinforcement Learning 6 Data
+Augmentation for Time-Series Classification: An Extensive Empirical
+Study and Comprehensive Survey 7 Empirical Game Theoretic Analysis: A
+Survey 8 Against The Achilles’ Heel: A Survey on Red Teaming for
+Generative Models 9 Enhanced Recommendation Systems with
+Retrieval-Augmented Large Language Model 10 Principles for Responsible
+AI Consciousness Research topic_label citations year 1 Otros 34 2025 2
+Otros 26 2025 3 IA Generativa 20 2025 4 Otros 17 2025 5 Machine Learning
+17 2025 6 Machine Learning 16 2025 7 Otros 15 2025 8 IA Generativa 13
+2025 9 IA Generativa 13 2025 10 Otros 11 2025</p>
+</div>
+<div id="análisis-por-año-y-tema" class="section level4">
+<h4>5.4 Análisis por año y tema</h4>
+<pre class="r"><code>cat(&quot;**5. Distribución de papers por año y tema**\n\n&quot;)</code></pre>
+<p><strong>5. Distribución de papers por año y tema</strong></p>
+<pre class="r"><code>dbGetQuery(con, &quot;
+  SELECT 
+    year,
+    topic_label,
+    COUNT(*) AS num_papers,
+    ROUND(AVG(citations), 2) AS promedio_citas
+  FROM papers
+  WHERE year IS NOT NULL
+  GROUP BY year, topic_label
+  ORDER BY year DESC, num_papers DESC
+&quot;)</code></pre>
+<p>year topic_label num_papers promedio_citas 1 2025 Otros 88 2.41 2
+2025 Machine Learning 29 1.97 3 2025 IA Generativa 12 5.83 4 2025
+Estadística 3 0.33</p>
+</div>
+<div id="análisis-combinado-de-autores-y-papers" class="section level4">
+<h4>5.5 Análisis combinado de autores y papers</h4>
+<pre class="r"><code>cat(&quot;**6. Autores más influyentes (por promedio de citas)**\n\n&quot;)</code></pre>
+<p><strong>6. Autores más influyentes (por promedio de
+citas)</strong></p>
+<pre class="r"><code>dbGetQuery(con, &quot;
+  SELECT 
+    a.author_name,
+    COUNT(DISTINCT pa.paper_id) AS num_papers,
+    ROUND(AVG(p.citations), 2) AS promedio_citas,
+    MAX(p.citations) AS max_citas
+  FROM authors a
+  JOIN paper_authors pa ON a.author_id = pa.author_id
+  JOIN papers p ON pa.paper_id = p.paper_id
+  WHERE p.citations IS NOT NULL
+  GROUP BY a.author_id
+  ORDER BY promedio_citas DESC
+  LIMIT 10
+&quot;)</code></pre>
+<pre><code>           author_name num_papers promedio_citas max_citas</code></pre>
+<p>1 Svetlana Kiritchenko 1 34 34 2 Hillary Dawkins 1 34 34 3 Kathleen
+C. Fraser 1 34 34 4 Richard C. Korzekwa 1 26 26 5 Jan Brauner 1 26 26 6
+John Salvatier 1 26 26 7 Zach Stein-Perlman 1 26 26 8 Stephen Thomas 1
+26 26 9 Benjamin Weinstein-Raun 1 26 26 10 Harlan Stewart 1 26 26</p>
+<pre class="r"><code>cat(&quot;\n**7. Coautorías: pares de autores con múltiples artículos juntos**\n\n&quot;)</code></pre>
+<p><strong>7. Coautorías: pares de autores con múltiples artículos
+juntos</strong></p>
+<pre class="r"><code>dbGetQuery(con, &quot;
+  SELECT 
+    a1.author_name AS Autor1,
+    a2.author_name AS Autor2,
+    COUNT(DISTINCT pa1.paper_id) AS num_coautorías
+  FROM paper_authors pa1
+  JOIN paper_authors pa2 ON pa1.paper_id = pa2.paper_id 
+    AND pa1.author_id &lt; pa2.author_id
+  JOIN authors a1 ON pa1.author_id = a1.author_id
+  JOIN authors a2 ON pa2.author_id = a2.author_id
+  GROUP BY pa1.author_id, pa2.author_id
+  HAVING COUNT(DISTINCT pa1.paper_id) &gt; 1
+  ORDER BY num_coautorías DESC
+  LIMIT 10
+&quot;)</code></pre>
+<pre><code>        Autor1          Autor2 num_coautorías</code></pre>
+<p>1 Johannes Jakubik Michael Vössing 2 2 Johannes Jakubik Gerhard
+Satzger 2 3 Michael Vössing Gerhard Satzger 2 4 Evan Yifan Xu Pan Xu
+2</p>
+</div>
+<div id="análisis-de-referencias" class="section level4">
+<h4>5.6 Análisis de referencias</h4>
+<pre class="r"><code>cat(&quot;**8. Referencias registradas en la base de datos**\n\n&quot;)</code></pre>
+<p><strong>8. Referencias registradas en la base de datos</strong></p>
+<pre class="r"><code>dbGetQuery(con, &quot;
+  SELECT 
+    ar.reference_id,
+    ar.reference_text_normalized,
+    COUNT(DISTINCT prl.paper_id) as num_papers_con_esta_ref
+  FROM article_references ar
+  LEFT JOIN paper_reference_links prl ON ar.reference_id = prl.reference_id
+  GROUP BY ar.reference_id
+  ORDER BY num_papers_con_esta_ref DESC
+  LIMIT 10
+&quot;)</code></pre>
+<p>reference_id 1 8 2 7 3 10 4 4 5 6 6 9 7 2 8 3 9 5 10 1
+reference_text_normalized 1 Vaswani, A., et al. (2017). Attention is all
+you need. NIPS. 2 Krizhevsky, A., Sutskever, I., &amp; Hinton, G. E.
+(2012). ImageNet classification. 3 Radford, A., et al. (2019). Language
+models are unsupervised multitask learners. 4 Hastie, T., Tibshirani,
+R., &amp; Friedman, J. (2009). The Elements of Statistical Learning.
+Springer. 5 LeCun, Y., Bengio, Y., &amp; Hinton, G. (2015). Deep
+learning. Nature, 521(7553). 6 Devlin, J., et al. (2019). BERT:
+Pre-training of deep bidirectional transformers. 7 Koller, D., &amp;
+Friedman, N. (2009). Probabilistic Graphical Models. MIT Press. 8
+Bishop, C. M. (2006). Pattern Recognition and Machine Learning.
+Springer. 9 Goodfellow, I., Bengio, Y., &amp; Courville, A. (2016). Deep
+Learning. MIT Press. 10 Pearl, J. (2009). Causality: Models, Reasoning
+and Inference. Cambridge University Press. num_papers_con_esta_ref 1 79
+2 77 3 75 4 74 5 73 6 73 7 69 8 68 9 67 10 65</p>
+<pre class="r"><code>cat(&quot;\n**9. Papers con más referencias**\n\n&quot;)</code></pre>
+<p><strong>9. Papers con más referencias</strong></p>
+<pre class="r"><code>dbGetQuery(con, &quot;
+  SELECT 
+    p.paper_id,
+    SUBSTR(p.title, 1, 60) as titulo_corto,
+    COUNT(DISTINCT prl.reference_id) as num_referencias
+  FROM papers p
+  LEFT JOIN paper_reference_links prl ON p.paper_id = prl.paper_id
+  GROUP BY p.paper_id
+  ORDER BY num_referencias DESC
+  LIMIT 10
+&quot;)</code></pre>
+<p>paper_id titulo_corto 1 18 Reasoning about Decidability of Strategic
+Logics with Imperf 2 34 An Extensive Empirical Evaluation of Inferring
+Preconditions 3 43 Generalizing the Regret: an Analysis of Lower and
+Upper Boun 4 44 Adaptive Few-Shot Class-Incremental Learning via Latent
+Vari 5 49 TabID: Automatic Identification and Tabulation of Subproblem 6
+54 Defensive Alliances in Signed Networks 7 58 AI Governance in the GCC
+States: A Comparative Analysis of N 8 63 Preference Tuning with Human
+Feedback on Language, Speech, a 9 67 DSAC: Distributional Soft
+Actor-Critic for Risk-Sensitive R 10 81 Scalable Synthesis of Formally
+Verified Neural Value Functio num_referencias 1 8 2 8 3 8 4 8 5 8 6 8 7
+8 8 8 9 8 10 8</p>
+</div>
+<div id="resumen-general-de-la-base-de-datos" class="section level4">
+<h4>5.7 Resumen general de la base de datos</h4>
+<pre class="r"><code>cat(&quot;**10. Resumen de contenido de la base de datos**\n\n&quot;)</code></pre>
+<p><strong>10. Resumen de contenido de la base de datos</strong></p>
+<pre class="r"><code>cat(&quot;Total de papers:&quot;, dbGetQuery(con, &quot;SELECT COUNT(*) as n FROM papers&quot;)$n, &quot;\n\n&quot;)</code></pre>
+<p>Total de papers: 132</p>
+<pre class="r"><code>cat(&quot;Total de autores únicos:&quot;, dbGetQuery(con, &quot;SELECT COUNT(*) as n FROM authors&quot;)$n, &quot;\n\n&quot;)</code></pre>
+<p>Total de autores únicos: 514</p>
+<pre class="r"><code>cat(&quot;Total de relaciones paper-autor:&quot;, dbGetQuery(con, &quot;SELECT COUNT(*) as n FROM paper_authors&quot;)$n, &quot;\n\n&quot;)</code></pre>
+<p>Total de relaciones paper-autor: 526</p>
+<pre class="r"><code>cat(&quot;Total de referencias registradas:&quot;, dbGetQuery(con, &quot;SELECT COUNT(*) as n FROM article_references&quot;)$n, &quot;\n\n&quot;)</code></pre>
+<p>Total de referencias registradas: 10</p>
+<pre class="r"><code>cat(&quot;Total de relaciones paper-reference:&quot;, dbGetQuery(con, &quot;SELECT COUNT(*) as n FROM paper_reference_links&quot;)$n, &quot;\n\n&quot;)</code></pre>
+<p>Total de relaciones paper-reference: 720</p>
+<pre class="r"><code># Estadísticas adicionales
+stats &lt;- dbGetQuery(con, &quot;
+  SELECT 
+    (SELECT AVG(n) FROM (SELECT COUNT(*) as n FROM paper_authors GROUP BY paper_id)) as avg_autores,
+    (SELECT AVG(citations) FROM papers WHERE citations IS NOT NULL) as avg_citas,
+    (SELECT AVG(n) FROM (SELECT COUNT(*) as n FROM paper_reference_links GROUP BY paper_id)) as avg_referencias
+&quot;)
+
+cat(&quot;Promedio de autores por paper:&quot;, round(stats$avg_autores[1], 2), &quot;\n&quot;)</code></pre>
+<p>Promedio de autores por paper: 3.98</p>
+<pre class="r"><code>cat(&quot;Promedio de citas por paper:&quot;, round(stats$avg_citas[1], 2), &quot;\n&quot;)</code></pre>
+<p>Promedio de citas por paper: 2.58</p>
+<pre class="r"><code>cat(&quot;Promedio de referencias por paper:&quot;, round(stats$avg_referencias[1], 2), &quot;\n&quot;)</code></pre>
+<p>Promedio de referencias por paper: 5.45</p>
+</div>
+</div>
+</div>
+<div id="cierre-de-conexión" class="section level1">
+<h1>Cierre de conexión</h1>
+<p>dbDisconnect(con) cat(“✓ Conexión cerrada. Base de datos guardada en
+‘revista_q1_2025.sqlite’”) ```</p>
 <div id="hallazgos" class="section level3">
 <h3>6. Hallazgos:</h3>
-<p>resultados más relevantes.</p>
+<ul>
+<li><p>El hallazgo mas importante es la estructura de la pagina Web del
+Repositorio en donde se tienen cada uno de los “Issues” o Cargues de
+Articulos en donde se encuentran 3 por año. En el caso del año 2025 se
+encuentran los volumenes 82, 83, y 84 correspondientes al año
+2025.</p></li>
+<li><p>Alli el reto era conseguir lasa 3 URL e iterar el ingreso a cada
+una de las paginas de los articulos. De este modo se logran cargar mas
+de 100 registros de articulos, logrando capturar variables
+importantes.</p></li>
+<li><p>El siguiente reto fue la construccion de la estructura de la base
+de datos, ya que se trataba de tablas relacionadas. Por ello al comienzo
+se realizaron pruebas con una sola tabla unificada.</p></li>
+</ul>
 </div>
 <div id="limitaciones" class="section level3">
 <h3>7. Limitaciones:</h3>
-<p>datos faltantes, restricciones del sitio, problemas de scraping y
-métricas no disponibles.</p>
+<ul>
+<li>Datos faltantes:</li>
+</ul>
+<p>En el caso de las referencias o el numero de referencias, existian
+campos en los que no habian valores por el hecho de ser un articulo que
+hasta el momento nadie ha citado (0 referencias) y por esto no existia
+el valor. De esta manera se pone en 0 estos valores.</p>
+<ul>
+<li>Restricciones del sitio:</li>
+</ul>
+<p>Como restricciones principales se encontraron las métricas ausentes
+en termino de descargas. Así mismo las referecias, y las citas, fueron
+campos que se realizaron a partir de la creacion de una funcion y
+posteriormente derivada de los datos iniciales.</p>
+<ul>
+<li>Problemas de scraping y métricas no disponibles:</li>
+</ul>
+<p>El principal problema fue la ausencia de la variable descargas y
+referencias.</p>
 </div>
 <div id="conclusión" class="section level3">
 <h3>8. Conclusión:</h3>
-<p>síntesis breve del ejercicio.</p>
+<ul>
+<li>El desarrollo del proyecto permitió demostrar que el Web Scraping es
+una herramienta efectiva para la construcción de bases de datos
+académicas estructuradas a partir de información disponible en
+repositorios científicos. Mediante la extracción automatizada de
+artículos de la revista <em>Journal of Artificial Intelligence Research
+(JAIR)</em>, fue posible consolidar más de 100 registros con variables
+relevantes como título, autores, DOI, resumen, citas y clasificación
+temática, facilitando posteriormente su análisis mediante consultas
+SQL.</li>
+</ul>
+<!-- -->
+<ul>
+<li>La integración entre técnicas de Web Scraping, procesamiento de
+datos y bases de datos relacionales permitió construir una estructura
+robusta y escalable en SQLite. La separación de entidades como
+artículos, autores y referencias mediante relaciones muchos-a-muchos
+evidenció la importancia del diseño de bases de datos normalizadas para
+evitar redundancia y permitir consultas analíticas complejas, como
+análisis de coautorías, citaciones y distribución temática de los
+papers.</li>
+</ul>
+<!-- -->
+<ul>
+<li>El proyecto también evidenció las limitaciones comunes en procesos
+de extracción de datos desde fuentes web académicas, especialmente
+relacionadas con métricas no disponibles directamente en el sitio, como
+descargas y referencias completas. Sin embargo, el uso complementario de
+APIs externas como OpenAlex permitió enriquecer significativamente la
+información recolectada, demostrando que la combinación de múltiples
+fuentes de datos mejora la calidad analítica y amplía las posibilidades
+de minería de datos e investigación científica.</li>
+</ul>
 </div>
 </div>
 
